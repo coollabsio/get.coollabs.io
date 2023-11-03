@@ -1,12 +1,12 @@
 require("dotenv").config();
 const fastify = require("fastify")({ logger: false, trustProxy: true });
 const path = require("path");
-const Redis = require("ioredis");
-if (!process.env.REDIS_URI) {
-  throw new Error("REDIS_URI is not defined");
+if (!process.env.NOCODB_URL) {
+  throw new Error("NOCODB_URL is not defined");
 }
-const redis = new Redis(process.env.REDIS_URI);
-
+if (!process.env.NOCODB_TOKEN) {
+  throw new Error("NOCODB_TOKEN is not defined");
+}
 fastify.register(require("@fastify/cors"));
 fastify.register(require("@fastify/static"), {
   root: path.join(__dirname, "static"),
@@ -17,27 +17,50 @@ fastify.get("/", function (req, reply) {
 });
 fastify.get("/versions.json", async function (req, reply) {
   const appId = req.query.appId;
-  await redis.set(appId, new Date().getTime());
+  const found = await fetch(process.env.NOCODB_URL + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
+    headers: {
+      'xc-token': process.env.NOCODB_TOKEN
+    }
+  })
+  const json = await found.json();
+  if (json && json?.Id) {
+    const payload =  JSON.stringify({
+      LastSeen: new Date().getTime()
+    });
+    fetch(process.env.NOCODB_URL + '/' + json.Id, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        'xc-token': process.env.NOCODB_TOKEN
+      },
+      body: payload
+    });
+  }
   return reply.sendFile("versions.json");
 });
 fastify.get("/instances", async function (req, reply) {
   if (req.headers["cool-api-key"] !== process.env.API_KEY) {
     return reply.redirect("https://coollabs.io");
   }
-  const instances = await redis.keys("*");
-  return { count: instances.length };
+  const instances = await fetch(process.env.NOCODB_URL + "/count", {
+    headers: {
+      'xc-token': process.env.NOCODB_TOKEN
+    }
+  });
+  const json = await instances.json();
+  return { count: json.count };
 });
-fastify.get("/instances/seen", async function (req, reply) {
-  if (req.headers["cool-api-key"] !== process.env.API_KEY) {
-    return reply.redirect("https://coollabs.io");
-  }
-  const instances = await redis.keys("*");
-  const lastSeen = [];
-  for (const instance of instances) {
-    lastSeen.push({ seen: new Date(Number(await redis.get(instance))) });
-  }
-  return { lastSeen };
-});
+// fastify.get("/instances/seen", async function (req, reply) {
+//   if (req.headers["cool-api-key"] !== process.env.API_KEY) {
+//     return reply.redirect("https://coollabs.io");
+//   }
+//   const instances = await redis.keys("*");
+//   const lastSeen = [];
+//   for (const instance of instances) {
+//     lastSeen.push({ seen: new Date(Number(await redis.get(instance))) });
+//   }
+//   return { lastSeen };
+// });
 
 const start = async () => {
   try {
