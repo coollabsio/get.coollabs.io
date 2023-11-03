@@ -35,6 +35,19 @@ fastify.get("/versions.json", async function (req, reply) {
       },
       body: payload
     });
+  } else {
+    const payload =  JSON.stringify({
+      Uuid: appId,
+      LastSeen: new Date().getTime()
+    });
+    fetch(process.env.NOCODB_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'xc-token': process.env.NOCODB_TOKEN
+      },
+      body: payload
+    });
   }
   return reply.sendFile("versions.json");
 });
