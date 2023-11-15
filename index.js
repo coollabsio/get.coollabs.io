@@ -15,9 +15,11 @@ fastify.register(require("@fastify/static"), {
 fastify.get("/", function (req, reply) {
   return reply.sendFile("index.html");
 });
-fastify.get("/versions.json", async function (req, reply) {
+fastify.get("/v4", async function (req, reply) {
   const appId = req.query.appId;
-  const found = await fetch(process.env.NOCODB_URL + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
+  const baseUrl = process.env.NOCODB_URL;
+  const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/v4InstanceCounter"
+  const found = await fetch(nocodbUrl + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
     headers: {
       'xc-token': process.env.NOCODB_TOKEN
     }
@@ -27,7 +29,7 @@ fastify.get("/versions.json", async function (req, reply) {
     const payload =  JSON.stringify({
       LastSeen: new Date().getTime()
     });
-    fetch(process.env.NOCODB_URL + '/' + json.Id, {
+    fetch(nocodbUrl + '/' + json.Id, {
       method: 'PATCH',
       headers: {
         'content-type': 'application/json',
@@ -40,7 +42,46 @@ fastify.get("/versions.json", async function (req, reply) {
       Uuid: appId,
       LastSeen: new Date().getTime()
     });
-    fetch(process.env.NOCODB_URL, {
+    fetch(nocodbUrl, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'xc-token': process.env.NOCODB_TOKEN
+      },
+      body: payload
+    });
+  }
+  return 'OK';
+
+});
+fastify.get("/versions.json", async function (req, reply) {
+  const appId = req.query.appId;
+  const baseUrl = process.env.NOCODB_URL;
+  const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/InstanceCounter"
+  const found = await fetch(nocodbUrl + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
+    headers: {
+      'xc-token': process.env.NOCODB_TOKEN
+    }
+  })
+  const json = await found.json();
+  if (json && json?.Id) {
+    const payload =  JSON.stringify({
+      LastSeen: new Date().getTime()
+    });
+    fetch(nocodbUrl + '/' + json.Id, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        'xc-token': process.env.NOCODB_TOKEN
+      },
+      body: payload
+    });
+  } else {
+    const payload =  JSON.stringify({
+      Uuid: appId,
+      LastSeen: new Date().getTime()
+    });
+    fetch(nocodbUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -51,11 +92,27 @@ fastify.get("/versions.json", async function (req, reply) {
   }
   return reply.sendFile("versions.json");
 });
+fastify.get("/instances/v4", async function (req, reply) {
+  if (req.headers["cool-api-key"] !== process.env.API_KEY) {
+    return reply.redirect("https://coollabs.io");
+  }
+  const baseUrl = process.env.NOCODB_URL;
+  const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/v4InstanceCounter"
+  const instances = await fetch(nocodbUrl + "/count", {
+    headers: {
+      'xc-token': process.env.NOCODB_TOKEN
+    }
+  });
+  const json = await instances.json();
+  return { count: json.count };
+});
 fastify.get("/instances", async function (req, reply) {
   if (req.headers["cool-api-key"] !== process.env.API_KEY) {
     return reply.redirect("https://coollabs.io");
   }
-  const instances = await fetch(process.env.NOCODB_URL + "/count", {
+  const baseUrl = process.env.NOCODB_URL;
+  const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/InstanceCounter"
+  const instances = await fetch(nocodbUrl + "/count", {
     headers: {
       'xc-token': process.env.NOCODB_TOKEN
     }
