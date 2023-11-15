@@ -17,6 +17,9 @@ fastify.get("/", function (req, reply) {
 });
 fastify.get("/coolify/v4/alive", async function (req, reply) {
   const appId = req.query.appId;
+  if (!appId || appId === "") {
+    return 'OK';
+  }
   const baseUrl = process.env.NOCODB_URL;
   const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/v4InstanceCounter"
   const found = await fetch(nocodbUrl + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
