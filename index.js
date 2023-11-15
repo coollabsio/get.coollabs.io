@@ -15,7 +15,7 @@ fastify.register(require("@fastify/static"), {
 fastify.get("/", function (req, reply) {
   return reply.sendFile("index.html");
 });
-fastify.get("/v4", async function (req, reply) {
+fastify.get("/coolify/v4/alive", async function (req, reply) {
   const appId = req.query.appId;
   const baseUrl = process.env.NOCODB_URL;
   const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/v4InstanceCounter"
@@ -92,7 +92,7 @@ fastify.get("/versions.json", async function (req, reply) {
   }
   return reply.sendFile("versions.json");
 });
-fastify.get("/instances/v4", async function (req, reply) {
+fastify.get("/coolify/v4/instances", async function (req, reply) {
   if (req.headers["cool-api-key"] !== process.env.API_KEY) {
     return reply.redirect("https://coollabs.io");
   }
