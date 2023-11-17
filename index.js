@@ -29,7 +29,7 @@ fastify.get("/coolify/v4/alive", async function (req, reply) {
   })
   const json = await found.json();
   if (json && json?.Id) {
-    const payload =  JSON.stringify({
+    const payload = JSON.stringify({
       LastSeen: new Date().getTime()
     });
     fetch(nocodbUrl + '/' + json.Id, {
@@ -41,7 +41,7 @@ fastify.get("/coolify/v4/alive", async function (req, reply) {
       body: payload
     });
   } else {
-    const payload =  JSON.stringify({
+    const payload = JSON.stringify({
       Uuid: appId,
       LastSeen: new Date().getTime()
     });
@@ -68,7 +68,7 @@ fastify.get("/versions.json", async function (req, reply) {
   })
   const json = await found.json();
   if (json && json?.Id) {
-    const payload =  JSON.stringify({
+    const payload = JSON.stringify({
       LastSeen: new Date().getTime()
     });
     fetch(nocodbUrl + '/' + json.Id, {
@@ -80,7 +80,7 @@ fastify.get("/versions.json", async function (req, reply) {
       body: payload
     });
   } else {
-    const payload =  JSON.stringify({
+    const payload = JSON.stringify({
       Uuid: appId,
       LastSeen: new Date().getTime()
     });
@@ -120,8 +120,16 @@ fastify.get("/instances", async function (req, reply) {
       'xc-token': process.env.NOCODB_TOKEN
     }
   });
+  const nocodbUrlv4 = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/v4InstanceCounter"
+  const instancesv4 = await fetch(nocodbUrlv4 + "/count", {
+    headers: {
+      'xc-token': process.env.NOCODB_TOKEN
+    }
+  });
   const json = await instances.json();
-  return { count: json.count };
+  const jsonv4 = await instancesv4.json();
+
+  return { count: json.count + jsonv4.count };
 });
 // fastify.get("/instances/seen", async function (req, reply) {
 //   if (req.headers["cool-api-key"] !== process.env.API_KEY) {
