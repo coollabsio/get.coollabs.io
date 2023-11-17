@@ -59,6 +59,7 @@ fastify.get("/coolify/v4/alive", async function (req, reply) {
 });
 fastify.get("/versions.json", async function (req, reply) {
   const appId = req.query.appId;
+  const version = req.query.version || '0.0.0';
   const baseUrl = process.env.NOCODB_URL;
   const nocodbUrl = baseUrl + "/api/v1/db/data/noco/p8ovlkfbtnecctq/InstanceCounter"
   const found = await fetch(nocodbUrl + "/find-one?where=where%28Uuid%2Ceq%2C" + appId + "%29", {
@@ -69,7 +70,8 @@ fastify.get("/versions.json", async function (req, reply) {
   const json = await found.json();
   if (json && json?.Id) {
     const payload = JSON.stringify({
-      LastSeen: new Date().getTime()
+      LastSeen: new Date().getTime(),
+      Version: version
     });
     fetch(nocodbUrl + '/' + json.Id, {
       method: 'PATCH',
@@ -82,7 +84,8 @@ fastify.get("/versions.json", async function (req, reply) {
   } else {
     const payload = JSON.stringify({
       Uuid: appId,
-      LastSeen: new Date().getTime()
+      LastSeen: new Date().getTime(),
+      Version: version
     });
     fetch(nocodbUrl, {
       method: 'POST',
