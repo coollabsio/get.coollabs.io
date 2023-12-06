@@ -15,12 +15,12 @@ fastify.register(require("@fastify/static"), {
 fastify.get("/", function (req, reply) {
   return reply.sendFile("index.html");
 });
-fastify.get("/coolify/service-templates.yaml", function (req, reply) {
-  return reply.redirect("https://coolcdn.b-cdn.net/coolify/service-templates.yaml");
-});
-fastify.get("/coolify/service-tags.json", function (req, reply) {
-  return reply.redirect("https://coolcdn.b-cdn.net/coolify/service-tags.json");
-});
+// fastify.get("/coolify/service-templates.yaml", function (req, reply) {
+//   return reply.redirect("https://coolcdn.b-cdn.net/coolify/service-templates.yaml");
+// });
+// fastify.get("/coolify/service-tags.json", function (req, reply) {
+//   return reply.redirect("https://coolcdn.b-cdn.net/coolify/service-tags.json");
+// });
 fastify.get("/coolify/v4/alive", async function (req, reply) {
   const appId = req.query.appId;
   const version = req.query.version || "0.0.0";
