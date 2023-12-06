@@ -1,5 +1,5 @@
 require("dotenv").config();
-const fastify = require("fastify")({ logger: true, trustProxy: true });
+const fastify = require("fastify")({ logger: false, trustProxy: true });
 const path = require("path");
 if (!process.env.NOCODB_URL) {
   throw new Error("NOCODB_URL is not defined");
