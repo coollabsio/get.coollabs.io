@@ -8,9 +8,9 @@ if (!process.env.NOCODB_TOKEN) {
   throw new Error("NOCODB_TOKEN is not defined");
 }
 fastify.register(require("@fastify/cors"));
-// fastify.register(require("@fastify/static"), {
-//   root: path.join(__dirname, "static"),
-// });
+fastify.register(require("@fastify/static"), {
+  root: path.join(__dirname, "static"),
+});
 
 fastify.get("/", function (req, reply) {
   // return reply.sendFile("index.html");
