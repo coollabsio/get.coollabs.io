@@ -45,7 +45,7 @@ fastify.get("/instances", async function (req, reply) {
 
   return { count: json.count + jsonv4.count };
 });
-fastify.get("/coolify/v4/alive", async function (req, reply) {
+fastify.get("/v4/alive", async function (req, reply) {
   const appId = req.query.appId;
   const version = req.query.version || "0.0.0";
   if (!appId || appId === "") {
